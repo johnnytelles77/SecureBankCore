@@ -1,5 +1,7 @@
 package com.johnny.securebank.service;
 
+import com.johnny.securebank.exception.DuplicateEmailException;
+import com.johnny.securebank.exception.UserNotFoundException;
 import com.johnny.securebank.model.User;
 import com.johnny.securebank.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class UserService {
 
     public User registerUser(User user){
         if(userRepository.existsByEmail(user.getEmail())){
-            throw new IllegalArgumentException("Email already exists!");
+            throw new DuplicateEmailException("Email already exists!");
         }
         user.setCreatedAt(LocalDateTime.now());
         return userRepository.save(user);
@@ -30,7 +32,7 @@ public class UserService {
 
     public User getUserById(Long id){
         return userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("User not found!"));
+                .orElseThrow(() -> new UserNotFoundException("User not found!"));
     }
 
     public User updateUser(Long id, User updatedUser){

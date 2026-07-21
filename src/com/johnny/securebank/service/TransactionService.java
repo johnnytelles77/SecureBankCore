@@ -1,5 +1,6 @@
 package com.johnny.securebank.service;
 
+import com.johnny.securebank.exception.AccountNotFoundException;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.model.Transaction;
 import com.johnny.securebank.model.enums.TransactionType;
@@ -25,7 +26,7 @@ public class TransactionService {
     public Transaction deposit(Long accountId, Double amount) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(()-> new IllegalArgumentException("Account not found"));
+                .orElseThrow(()-> new AccountNotFoundException("Account not found"));
         account.deposit(amount);
         accountRepository.save(account);
 
@@ -44,7 +45,7 @@ public class TransactionService {
     public Transaction withdraw(Long accountId, Double amount) {
 
         Account account = accountRepository.findById(accountId)
-                .orElseThrow(()-> new IllegalArgumentException("Account not found"));
+                .orElseThrow(()-> new AccountNotFoundException("Account not found"));
         account.withdraw(amount);
         accountRepository.save(account);
 
@@ -63,9 +64,9 @@ public class TransactionService {
     public Transaction transfer(Long fromAccountId, Long toAccountId, Double amount) {
 
         Account fromAccount = accountRepository.findById(fromAccountId)
-                .orElseThrow(()-> new IllegalArgumentException("From account not found"));
+                .orElseThrow(()-> new AccountNotFoundException("From account not found"));
         Account toAccount = accountRepository.findById(toAccountId)
-                .orElseThrow(()-> new IllegalArgumentException("To account not found"));
+                .orElseThrow(()-> new AccountNotFoundException("To account not found"));
 
         fromAccount.transferTo(toAccount, amount);
 

@@ -1,5 +1,7 @@
 package com.johnny.securebank.service;
 
+import com.johnny.securebank.exception.AccountNotFoundException;
+import com.johnny.securebank.exception.DuplicateAccountException;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.model.enums.AccountStatus;
 import com.johnny.securebank.repository.AccountRepository;
@@ -19,7 +21,7 @@ public class AccountService {
 
     public Account createAccount(Account account) {
         if (accountRepository.existsByAccountNumber(account.getAccountNumber())) {
-            throw new IllegalArgumentException("Account already exists!");
+            throw new DuplicateAccountException("Account already exists!");
         }
         account.setStatus(AccountStatus.ACTIVE);
         account.setBalance(0.0);
@@ -30,7 +32,7 @@ public class AccountService {
 
     public Account getAccountById(Long id) {
         return accountRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Account not found"));
+                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
     }
 
     public List<Account> getAccounts() {

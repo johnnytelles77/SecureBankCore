@@ -30,7 +30,7 @@ public class DataLoader implements CommandLineRunner {
                 "Johnny",
                 "Telles",
                 "johnnyt7@test.com",
-                "12345",
+                "123456789",
                 Role.ADMIN
         );
         User savedUser = userService.registerUser(user);
