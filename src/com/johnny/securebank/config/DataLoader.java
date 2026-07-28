@@ -11,7 +11,7 @@ import com.johnny.securebank.service.UserService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-@Component
+//@Component
 public class DataLoader implements CommandLineRunner {
 
     private final UserService userService;
@@ -24,9 +24,9 @@ public class DataLoader implements CommandLineRunner {
         this.transactionService = transactionService;
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        User user = new User(
+     @Override
+   public void run(String... args) throws Exception {
+        /*User user = new User(
                 "Johnny",
                 "Telles",
                 "johnnyt7@test.com",
@@ -62,6 +62,6 @@ public class DataLoader implements CommandLineRunner {
         Account updatedSavings = accountService.getAccountById(savingsAccount.getId());
 
         System.out.println(updatedChecking.getBalance());
-        System.out.println(updatedSavings.getBalance());
+        System.out.println(updatedSavings.getBalance());*/
     }
 }

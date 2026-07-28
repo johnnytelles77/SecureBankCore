@@ -1,5 +1,6 @@
 package com.johnny.securebank.service;
 
+import com.johnny.securebank.dto.UserResponseDTO;
 import com.johnny.securebank.exception.DuplicateEmailException;
 import com.johnny.securebank.exception.UserNotFoundException;
 import com.johnny.securebank.model.User;
@@ -18,36 +19,60 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public User registerUser(User user){
+    private UserResponseDTO convertToResponseDTO(User user) {
+        return new UserResponseDTO(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getRole()
+        );
+    }
+
+    private User findUserById(Long id) {
+        return userRepository.findById(id)
+                .orElseThrow(() ->
+                        new UserNotFoundException("User not found!"));
+    }
+
+    public UserResponseDTO registerUser(User user){
         if(userRepository.existsByEmail(user.getEmail())){
             throw new DuplicateEmailException("Email already exists!");
         }
         user.setCreatedAt(LocalDateTime.now());
-        return userRepository.save(user);
+
+        User savedUser = userRepository.save(user);
+
+        return convertToResponseDTO(savedUser);
     }
 
-    public List<User> getUsers(){
-        return userRepository.findAll();
+    public List<UserResponseDTO> getUsers(){
+        return userRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 
-    public User getUserById(Long id){
-        return userRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("User not found!"));
+    public UserResponseDTO getUserById(Long id){
+        User user = findUserById(id);
+
+        return convertToResponseDTO(user);
     }
 
-    public User updateUser(Long id, User updatedUser){
-        User existingUser = getUserById(id);
+    public UserResponseDTO updateUser(Long id, User updatedUser){
+        User existingUser = findUserById(id);
 
         existingUser.setFirstName(updatedUser.getFirstName());
         existingUser.setLastName(updatedUser.getLastName());
         existingUser.setEmail(updatedUser.getEmail());
         existingUser.setPassword(updatedUser.getPassword());
 
-        return userRepository.save(existingUser);
+        User savedUser = userRepository.save(existingUser);
+        return convertToResponseDTO(savedUser);
     }
 
     public void deleteUser(Long id){
-        User existingUser = getUserById(id);
+        User existingUser = findUserById(id);
         userRepository.delete(existingUser);
     }
 }
