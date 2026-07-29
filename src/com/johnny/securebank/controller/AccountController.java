@@ -1,5 +1,6 @@
 package com.johnny.securebank.controller;
 
+import com.johnny.securebank.dto.AccountResponseDTO;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.service.AccountService;
 import org.springframework.web.bind.annotation.*;
@@ -17,22 +18,22 @@ public class AccountController {
     }
 
     @PostMapping
-    public Account createAccount(@RequestBody Account account) {
+    public AccountResponseDTO createAccount(@RequestBody Account account) {
         return accountService.createAccount(account);
     }
 
     @GetMapping
-    public List<Account> getAccounts() {
+    public List<AccountResponseDTO> getAccounts() {
         return  accountService.getAccounts();
     }
 
     @GetMapping("/{id}")
-    public Account getAccountById(@PathVariable Long id) {
+    public AccountResponseDTO getAccountById(@PathVariable Long id) {
         return accountService.getAccountById(id);
     }
 
     @PutMapping("/{id}")
-    public Account updateAccount(@PathVariable Long id, @RequestBody Account account) {
+    public AccountResponseDTO updateAccount(@PathVariable Long id, @RequestBody Account account) {
         return accountService.updateAccount(id, account);
     }
 

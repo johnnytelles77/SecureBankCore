@@ -1,5 +1,6 @@
 package com.johnny.securebank.service;
 
+import com.johnny.securebank.dto.AccountResponseDTO;
 import com.johnny.securebank.exception.AccountNotFoundException;
 import com.johnny.securebank.exception.DuplicateAccountException;
 import com.johnny.securebank.model.Account;
@@ -19,7 +20,24 @@ public class AccountService {
         this.accountRepository = accountRepository;
     }
 
-    public Account createAccount(Account account) {
+    private AccountResponseDTO convertToResponseDTO(Account account) {
+        return new AccountResponseDTO(
+                account.getId(),
+                account.getAccountNumber(),
+                account.getBalance(),
+                account.getType(),
+                account.getStatus(),
+                account.getCreatedAt()
+        );
+    }
+
+    private Account findAccountById(Long id) {
+        return accountRepository.findById(id)
+                .orElseThrow(() ->
+                        new AccountNotFoundException("Account not found"));
+    }
+
+    public AccountResponseDTO createAccount(Account account) {
         if (accountRepository.existsByAccountNumber(account.getAccountNumber())) {
             throw new DuplicateAccountException("Account already exists!");
         }
@@ -27,31 +45,36 @@ public class AccountService {
         account.setBalance(0.0);
         account.setCreatedAt(LocalDateTime.now());
 
-        return accountRepository.save(account);
+        Account savedAccount = accountRepository.save(account);
+        return convertToResponseDTO(savedAccount);
     }
 
-    public Account getAccountById(Long id) {
-        return accountRepository.findById(id)
-                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+    public AccountResponseDTO getAccountById(Long id) {
+        Account account = findAccountById(id);
+        return convertToResponseDTO(account);
     }
 
-    public List<Account> getAccounts() {
-        return accountRepository.findAll();
+    public List<AccountResponseDTO> getAccounts() {
+        return accountRepository.findAll()
+                .stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 
-    public Account updateAccount(Long id, Account updatedAccount) {
+    public AccountResponseDTO updateAccount(Long id, Account updatedAccount) {
 
-        Account existingAccount = getAccountById(id);
+        Account existingAccount = findAccountById(id);
 
         existingAccount.setAccountNumber(updatedAccount.getAccountNumber());
         existingAccount.setType(updatedAccount.getType());
         existingAccount.setStatus(updatedAccount.getStatus());
 
-        return accountRepository.save(existingAccount);
+        Account savedAccount = accountRepository.save(existingAccount);
+        return convertToResponseDTO(savedAccount);
     }
 
     public void deleteAccount(Long id) {
-        Account existingAccount = getAccountById(id);
+        Account existingAccount = findAccountById(id);
         accountRepository.delete(existingAccount);
     }
 }
