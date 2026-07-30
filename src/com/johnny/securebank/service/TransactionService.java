@@ -1,5 +1,6 @@
 package com.johnny.securebank.service;
 
+import com.johnny.securebank.dto.TransactionResponseDTO;
 import com.johnny.securebank.exception.AccountNotFoundException;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.model.Transaction;
@@ -23,7 +24,28 @@ public class TransactionService {
         this.accountRepository = accountRepository;
     }
 
-    public Transaction deposit(Long accountId, Double amount) {
+    private TransactionResponseDTO convertToResponseDTO(Transaction transaction) {
+
+        Long fromAccountId = transaction.getFromAccount() != null
+                ? transaction.getFromAccount().getId()
+                : null;
+
+        Long toAccountId = transaction.getToAccount() != null
+                ? transaction.getToAccount().getId()
+                : null;
+
+        return new TransactionResponseDTO(
+                transaction.getId(),
+                transaction.getAmount(),
+                transaction.getDescription(),
+                transaction.getType(),
+                fromAccountId,
+                toAccountId,
+                transaction.getCreatedAt()
+        );
+    }
+
+    public TransactionResponseDTO deposit(Long accountId, Double amount) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()-> new AccountNotFoundException("Account not found"));
@@ -39,10 +61,11 @@ public class TransactionService {
                 account
         );
         transaction.setCreatedAt(LocalDateTime.now());
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        return convertToResponseDTO(savedTransaction);
     }
 
-    public Transaction withdraw(Long accountId, Double amount) {
+    public TransactionResponseDTO withdraw(Long accountId, Double amount) {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()-> new AccountNotFoundException("Account not found"));
@@ -58,10 +81,11 @@ public class TransactionService {
                 null
         );
         transaction.setCreatedAt(LocalDateTime.now());
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        return convertToResponseDTO(savedTransaction);
     }
 
-    public Transaction transfer(Long fromAccountId, Long toAccountId, Double amount) {
+    public TransactionResponseDTO transfer(Long fromAccountId, Long toAccountId, Double amount) {
 
         Account fromAccount = accountRepository.findById(fromAccountId)
                 .orElseThrow(()-> new AccountNotFoundException("From account not found"));
@@ -82,10 +106,14 @@ public class TransactionService {
                 toAccount
         );
         transaction.setCreatedAt(LocalDateTime.now());
-        return transactionRepository.save(transaction);
+        Transaction savedTransaction = transactionRepository.save(transaction);
+        return convertToResponseDTO(savedTransaction);
     }
 
-    public List<Transaction> getTransactionsByAccountId(Long accountId) {
-        return transactionRepository.findByFromAccountIdOrToAccountId(accountId, accountId);
+    public List<TransactionResponseDTO> getTransactionsByAccountId(Long accountId) {
+        return transactionRepository.findByFromAccountIdOrToAccountId(accountId, accountId)
+                .stream()
+                .map(this::convertToResponseDTO)
+                .toList();
     }
 }

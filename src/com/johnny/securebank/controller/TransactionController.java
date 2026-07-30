@@ -1,8 +1,8 @@
 package com.johnny.securebank.controller;
 
 import com.johnny.securebank.dto.AccountAmountRequestDTO;
+import com.johnny.securebank.dto.TransactionResponseDTO;
 import com.johnny.securebank.dto.TransferRequestDTO;
-import com.johnny.securebank.model.Transaction;
 import com.johnny.securebank.service.TransactionService;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,14 +19,14 @@ public class TransactionController {
     }
 
     @PostMapping("/deposit")
-    public Transaction deposit(@RequestBody AccountAmountRequestDTO request) {
+    public TransactionResponseDTO deposit(@RequestBody AccountAmountRequestDTO request) {
         return transactionService.deposit(
                 request.getAccountId(),
                 request.getAmount());
     }
 
     @PostMapping("/withdraw")
-    public Transaction withdraw(@RequestBody AccountAmountRequestDTO request) {
+    public TransactionResponseDTO withdraw(@RequestBody AccountAmountRequestDTO request) {
         return transactionService.withdraw(
                 request.getAccountId(),
                 request.getAmount()
@@ -34,7 +34,7 @@ public class TransactionController {
     }
 
     @PostMapping("/transfer")
-    public Transaction transfer(@RequestBody TransferRequestDTO request) {
+    public TransactionResponseDTO transfer(@RequestBody TransferRequestDTO request) {
         return transactionService.transfer(
                 request.getFromAccountId(),
                 request.getToAccountId(),
@@ -43,7 +43,7 @@ public class TransactionController {
     }
 
     @GetMapping("/account/{id}")
-    public List<Transaction> getTransactionByAccountId(@PathVariable Long id) {
+    public List<TransactionResponseDTO> getTransactionByAccountId(@PathVariable Long id) {
         return transactionService.getTransactionsByAccountId(id);
     }
 }
