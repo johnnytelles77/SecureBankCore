@@ -1,5 +1,7 @@
 package com.johnny.securebank.service;
 
+import com.johnny.securebank.dto.CreateUserRequestDTO;
+import com.johnny.securebank.dto.UpdateUserRequestDTO;
 import com.johnny.securebank.dto.UserResponseDTO;
 import com.johnny.securebank.exception.DuplicateEmailException;
 import com.johnny.securebank.exception.UserNotFoundException;
@@ -35,10 +37,19 @@ public class UserService {
                         new UserNotFoundException("User not found!"));
     }
 
-    public UserResponseDTO registerUser(User user){
-        if(userRepository.existsByEmail(user.getEmail())){
+    public UserResponseDTO registerUser(CreateUserRequestDTO request){
+        if(userRepository.existsByEmail(request.getEmail())){
             throw new DuplicateEmailException("Email already exists!");
         }
+
+        User user = new User(
+                request.getFirstName(),
+                request.getLastName(),
+                request.getEmail(),
+                request.getPassword(),
+                request.getRole()
+        );
+
         user.setCreatedAt(LocalDateTime.now());
 
         User savedUser = userRepository.save(user);
@@ -59,13 +70,13 @@ public class UserService {
         return convertToResponseDTO(user);
     }
 
-    public UserResponseDTO updateUser(Long id, User updatedUser){
+    public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO request){
         User existingUser = findUserById(id);
 
-        existingUser.setFirstName(updatedUser.getFirstName());
-        existingUser.setLastName(updatedUser.getLastName());
-        existingUser.setEmail(updatedUser.getEmail());
-        existingUser.setPassword(updatedUser.getPassword());
+        existingUser.setFirstName(request.getFirstName());
+        existingUser.setLastName(request.getLastName());
+        existingUser.setEmail(request.getEmail());
+        existingUser.setRole(request.getRole());
 
         User savedUser = userRepository.save(existingUser);
         return convertToResponseDTO(savedUser);

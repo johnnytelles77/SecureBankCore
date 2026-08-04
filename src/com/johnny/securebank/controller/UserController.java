@@ -1,5 +1,7 @@
 package com.johnny.securebank.controller;
 
+import com.johnny.securebank.dto.CreateUserRequestDTO;
+import com.johnny.securebank.dto.UpdateUserRequestDTO;
 import com.johnny.securebank.dto.UserResponseDTO;
 import com.johnny.securebank.model.User;
 import com.johnny.securebank.service.UserService;
@@ -18,8 +20,8 @@ public class UserController {
     }
 
     @PostMapping
-    public UserResponseDTO createUser(@Valid @RequestBody User user) {
-        return userService.registerUser(user);
+    public UserResponseDTO createUser(@Valid @RequestBody CreateUserRequestDTO request) {
+        return userService.registerUser(request);
     }
 
     @GetMapping("/{id}")
@@ -33,8 +35,8 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public UserResponseDTO updateUser(@RequestBody User user, @PathVariable Long id) {
-        return userService.updateUser(id, user);
+    public UserResponseDTO updateUser(@Valid @RequestBody UpdateUserRequestDTO request, @PathVariable Long id) {
+        return userService.updateUser(id, request);
     }
 
     @DeleteMapping("/{id}")

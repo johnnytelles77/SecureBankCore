@@ -1,8 +1,10 @@
 package com.johnny.securebank.controller;
 
 import com.johnny.securebank.dto.AccountResponseDTO;
+import com.johnny.securebank.dto.CreateAccountRequestDTO;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +20,8 @@ public class AccountController {
     }
 
     @PostMapping
-    public AccountResponseDTO createAccount(@RequestBody Account account) {
-        return accountService.createAccount(account);
+    public AccountResponseDTO createAccount(@Valid @RequestBody CreateAccountRequestDTO request) {
+        return accountService.createAccount(request);
     }
 
     @GetMapping
