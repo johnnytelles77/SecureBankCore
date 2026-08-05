@@ -2,6 +2,7 @@ package com.johnny.securebank.service;
 
 import com.johnny.securebank.dto.AccountResponseDTO;
 import com.johnny.securebank.dto.CreateAccountRequestDTO;
+import com.johnny.securebank.dto.UpdateAccountStatusRequestDTO;
 import com.johnny.securebank.exception.AccountNotFoundException;
 import com.johnny.securebank.exception.DuplicateAccountException;
 import com.johnny.securebank.exception.UserNotFoundException;
@@ -77,20 +78,20 @@ public class AccountService {
                 .toList();
     }
 
-    public AccountResponseDTO updateAccount(Long id, Account updatedAccount) {
-
+    public AccountResponseDTO updateAccountStatus(Long id, UpdateAccountStatusRequestDTO request) {
         Account existingAccount = findAccountById(id);
 
-        existingAccount.setAccountNumber(updatedAccount.getAccountNumber());
-        existingAccount.setType(updatedAccount.getType());
-        existingAccount.setStatus(updatedAccount.getStatus());
-
+        existingAccount.setStatus(request.getStatus());
         Account savedAccount = accountRepository.save(existingAccount);
         return convertToResponseDTO(savedAccount);
     }
 
-    public void deleteAccount(Long id) {
+    public AccountResponseDTO closeAccount(Long id) {
         Account existingAccount = findAccountById(id);
-        accountRepository.delete(existingAccount);
+
+        existingAccount.setStatus(AccountStatus.CLOSED);
+
+        Account savedAccount = accountRepository.save(existingAccount);
+        return convertToResponseDTO(savedAccount);
     }
 }

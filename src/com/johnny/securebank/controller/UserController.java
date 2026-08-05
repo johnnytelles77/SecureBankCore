@@ -3,7 +3,6 @@ package com.johnny.securebank.controller;
 import com.johnny.securebank.dto.CreateUserRequestDTO;
 import com.johnny.securebank.dto.UpdateUserRequestDTO;
 import com.johnny.securebank.dto.UserResponseDTO;
-import com.johnny.securebank.model.User;
 import com.johnny.securebank.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
