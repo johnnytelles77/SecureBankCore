@@ -111,6 +111,9 @@ public class TransactionService {
     }
 
     public List<TransactionResponseDTO> getTransactionsByAccountId(Long accountId) {
+        accountRepository.findById(accountId)
+                .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+
         return transactionRepository.findByFromAccountIdOrToAccountId(accountId, accountId)
                 .stream()
                 .map(this::convertToResponseDTO)
