@@ -214,6 +214,7 @@ public class UserServiceTest {
 
     @Test
     void deleteUser_shouldThrowExceptionWhenUserDoesNotExist() {
+
         when(userRepository.findById(1L)).thenReturn(Optional.empty());
 
         assertThrows(UserNotFoundException.class,

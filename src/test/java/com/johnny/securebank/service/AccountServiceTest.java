@@ -240,4 +240,63 @@ public class AccountServiceTest {
         verify(accountRepository).findById(1L);
         verify(accountRepository).save(any(Account.class));
     }
+
+    @Test
+    void updateAccountStatus_shouldThrowExceptionWhenAccountDoesNotExist() {
+        UpdateAccountStatusRequestDTO request = new UpdateAccountStatusRequestDTO(
+                AccountStatus.FROZEN
+        );
+
+        when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+
+
+        assertThrows(
+                AccountNotFoundException.class,
+                () -> accountService.updateAccountStatus(1L, request)
+        );
+        verify(accountRepository).findById(1L);
+        verify(accountRepository, never()).save(any(Account.class));
+    }
+
+    @Test
+    void closeAccount_shouldCloseAccount() {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "12345678",
+                Role.CUSTOMER
+        );
+        savedUser.setId(1L);
+
+        Account account = new Account(
+                1L,
+                "ACC-1001",
+                0.0,
+                savedUser,
+                LocalDateTime.now(),
+                AccountType.SAVINGS,
+                AccountStatus.ACTIVE
+        );
+        when(accountRepository.findById(1L)).thenReturn(Optional.of(account));
+        when(accountRepository.save(any(Account.class))).thenReturn(account);
+
+        AccountResponseDTO result = accountService.closeAccount(1L);
+
+        assertEquals(AccountStatus.CLOSED, result.getStatus());
+        verify(accountRepository).findById(1L);
+        verify(accountRepository).save(any(Account.class));
+    }
+
+    @Test
+    void closeAccount_shouldThrowExceptionWhenAccountDoesNotExist() {
+        when(accountRepository.findById(1L)).thenReturn(Optional.empty());
+
+        assertThrows(
+                AccountNotFoundException.class,
+                () -> accountService.closeAccount(1L));
+
+        verify(accountRepository).findById(1L);
+        verify(accountRepository, never()).save(any(Account.class));
+    }
 }
