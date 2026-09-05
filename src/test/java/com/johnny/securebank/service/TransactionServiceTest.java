@@ -2,7 +2,6 @@ package com.johnny.securebank.service;
 
 import com.johnny.securebank.dto.TransactionResponseDTO;
 import com.johnny.securebank.exception.AccountNotFoundException;
-import com.johnny.securebank.exception.InsufficientFundsException;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.model.Transaction;
 import com.johnny.securebank.model.User;
