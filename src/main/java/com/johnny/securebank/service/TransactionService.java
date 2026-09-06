@@ -8,6 +8,7 @@ import com.johnny.securebank.model.enums.TransactionType;
 import com.johnny.securebank.repository.AccountRepository;
 import com.johnny.securebank.repository.TransactionRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -45,6 +46,7 @@ public class TransactionService {
         );
     }
 
+    @Transactional
     public TransactionResponseDTO deposit(Long accountId, Double amount) {
 
         Account account = accountRepository.findById(accountId)
@@ -65,6 +67,7 @@ public class TransactionService {
         return convertToResponseDTO(savedTransaction);
     }
 
+    @Transactional
     public TransactionResponseDTO withdraw(Long accountId, Double amount) {
 
         Account account = accountRepository.findById(accountId)
@@ -85,6 +88,7 @@ public class TransactionService {
         return convertToResponseDTO(savedTransaction);
     }
 
+    @Transactional
     public TransactionResponseDTO transfer(Long fromAccountId, Long toAccountId, Double amount) {
 
         Account fromAccount = accountRepository.findById(fromAccountId)
