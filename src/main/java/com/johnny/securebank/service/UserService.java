@@ -7,7 +7,9 @@ import com.johnny.securebank.exception.DuplicateEmailException;
 import com.johnny.securebank.exception.UserNotFoundException;
 import com.johnny.securebank.model.User;
 import com.johnny.securebank.repository.UserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,9 +18,11 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     private UserResponseDTO convertToResponseDTO(User user) {
@@ -41,12 +45,13 @@ public class UserService {
         if(userRepository.existsByEmail(request.getEmail())){
             throw new DuplicateEmailException("Email already exists!");
         }
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
 
         User user = new User(
                 request.getFirstName(),
                 request.getLastName(),
                 request.getEmail(),
-                request.getPassword(),
+                encodedPassword,
                 request.getRole()
         );
 

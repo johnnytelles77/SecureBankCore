@@ -7,8 +7,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.web.servlet.MockMvc;
 
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -22,6 +27,9 @@ public class UserControllerIntegrationTest {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     void getUsers_shouldReturnOk() throws Exception {
@@ -54,5 +62,30 @@ public class UserControllerIntegrationTest {
     void getUserById_shouldReturn404WhenUserDoesNotExist() throws Exception {
         mockMvc.perform(get("/users/99999"))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void registerUser_shouldStoreHashedPassword() throws Exception {
+        mockMvc.perform(post("/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                                {
+                                "firstName": "Johnny",
+                                "lastName": "Telles",
+                                "email": "johnnyhash@test.com",
+                                "password": "12345678",
+                                "role": "CUSTOMER"
+                                }
+                                """))
+                .andExpect(status().isCreated());
+
+        User savedUser = userRepository.findByEmail("johnnyhash@test.com")
+                .orElseThrow();
+        assertNotEquals("12345678", savedUser.getPassword());
+
+        assertTrue(
+                passwordEncoder.matches("12345678",
+                        savedUser.getPassword())
+        );
     }
 }

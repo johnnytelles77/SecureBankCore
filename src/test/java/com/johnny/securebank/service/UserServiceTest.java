@@ -9,10 +9,13 @@ import com.johnny.securebank.model.User;
 import com.johnny.securebank.model.enums.Role;
 import com.johnny.securebank.repository.UserRepository;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 import java.util.Arrays;
 import java.util.List;
@@ -28,6 +31,9 @@ public class UserServiceTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private PasswordEncoder passwordEncoder;
 
     @InjectMocks
     private UserService userService;
@@ -52,11 +58,20 @@ public class UserServiceTest {
 
         savedUser.setId(1L);
 
+        ArgumentCaptor<User> userCaptor = ArgumentCaptor.forClass(User.class);
+
         when(userRepository.existsByEmail(request.getEmail())).thenReturn(false);
+        when(passwordEncoder.encode("12345678")).thenReturn("hashed-password");
         when(userRepository.save(any(User.class))).thenReturn(savedUser);
 
         /// ACT
         UserResponseDTO result = userService.registerUser(request);
+
+        verify(passwordEncoder).encode("12345678");
+        verify(userRepository).save(userCaptor.capture());
+        verify(userRepository).existsByEmail(request.getEmail());
+
+        User capturedUser = userCaptor.getValue();
 
         /// ASSERT
         assertEquals(1L, result.getId());
@@ -65,9 +80,7 @@ public class UserServiceTest {
         assertEquals("johnny@test.com", result.getEmail());
         assertEquals(Role.CUSTOMER, result.getRole());
 
-        verify(userRepository).save(any(User.class));
-        verify(userRepository).existsByEmail(request.getEmail());
-
+        assertEquals("hashed-password", capturedUser.getPassword());
     }
 
     @Test
