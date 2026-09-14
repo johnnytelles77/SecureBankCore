@@ -70,4 +70,14 @@ public class GlobalExceptionHandler {
                .status(HttpStatus.BAD_REQUEST)
                .body(response);
    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ResponseEntity<ErrorResponseDTO> handleInvalidCredentialsException(
+            InvalidCredentialsException e) {
+
+        return buildErrorResponse(
+                HttpStatus.UNAUTHORIZED,
+                e.getMessage()
+        );
+    }
 }
