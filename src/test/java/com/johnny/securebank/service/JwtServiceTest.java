@@ -74,4 +74,71 @@ public class JwtServiceTest {
        assertEquals(3600000L, tokenDuration);
    }
 
+    @Test
+    void extractEmail_shouldReturnEmailFromValidToken() {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+
+        String email = jwtService.extractEmail(token);
+
+        assertEquals("johnny@test.com", email);
+    }
+
+    @Test
+    void isTokenValid_shouldReturnTrueForValidToken() {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+
+        boolean valid = jwtService.isTokenValid(token, savedUser);
+        assertTrue(valid);
+    }
+
+    @Test
+    void isTokenValid_shouldReturnFalseForDifferentUser() {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+        User savedUser2 = new User(
+                "Juan",
+                "Perez",
+                "juan@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        boolean valid = jwtService.isTokenValid(token, savedUser2);
+        assertFalse(valid);
+   }
+
+    @Test
+    void isTokenValid_shouldReturnFalseForExpiredToken() {
+        ReflectionTestUtils.setField(jwtService, "expiration", -1000L);
+
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+        boolean valid = jwtService.isTokenValid(token, savedUser);
+        assertFalse(valid);
+    }
 }

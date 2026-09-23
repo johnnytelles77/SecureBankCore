@@ -146,13 +146,28 @@ public class Account {
     }
 
     public Account(
-          Long id,
           String accountNumber,
           Double balance,
           User user,
           LocalDateTime createdAt,
           AccountType type,
           AccountStatus status){
+        this.accountNumber = accountNumber;
+        this.balance = balance;
+        this.user = user;
+        this.createdAt = createdAt;
+        this.type = type;
+        this.status = status;
+    }
+    public Account(
+            Long id,
+            String accountNumber,
+            Double balance,
+            User user,
+            LocalDateTime createdAt,
+            AccountType type,
+            AccountStatus status) {
+
         this.id = id;
         this.accountNumber = accountNumber;
         this.balance = balance;

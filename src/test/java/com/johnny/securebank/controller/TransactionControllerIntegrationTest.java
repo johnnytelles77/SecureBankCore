@@ -8,12 +8,14 @@ import com.johnny.securebank.model.enums.Role;
 import com.johnny.securebank.repository.AccountRepository;
 import com.johnny.securebank.repository.TransactionRepository;
 import com.johnny.securebank.repository.UserRepository;
+import com.johnny.securebank.service.JwtService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@Transactional
 public class TransactionControllerIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
@@ -37,6 +40,9 @@ public class TransactionControllerIntegrationTest {
     @Autowired
     private AccountRepository accountRepository;
 
+    @Autowired
+    private JwtService jwtService;
+
     @Test
     void deposit_shouldIncreaseAccountBalance() throws Exception {
         User savedUser = new User(
@@ -47,9 +53,9 @@ public class TransactionControllerIntegrationTest {
                 Role.CUSTOMER
         );
         savedUser = userRepository.save(savedUser);
+        String token = jwtService.generateToken(savedUser);
 
         Account savedAccount = new Account(
-                1L,
                 "ACC-1001",
                 100.0,
                 savedUser,
@@ -60,6 +66,7 @@ public class TransactionControllerIntegrationTest {
         savedAccount = accountRepository.save(savedAccount);
 
         mockMvc.perform(post("/transactions/deposit")
+                        .header("Authorization", "Bearer " + token)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
                                 {
@@ -84,9 +91,9 @@ public class TransactionControllerIntegrationTest {
                 Role.CUSTOMER
         );
         savedUser = userRepository.save(savedUser);
+        String token = jwtService.generateToken(savedUser);
 
         Account savedAccount = new Account(
-                1L,
                 "ACC-1001",
                 100.0,
                 savedUser,
@@ -97,6 +104,7 @@ public class TransactionControllerIntegrationTest {
         savedAccount = accountRepository.save(savedAccount);
 
         mockMvc.perform(post("/transactions/withdraw")
+                        .header("Authorization", "Bearer " + token)
                 .contentType(MediaType.APPLICATION_JSON).content("""
                                 {
                                 "accountId": %d,
@@ -119,9 +127,9 @@ public class TransactionControllerIntegrationTest {
                 Role.CUSTOMER
         );
         savedUser = userRepository.save(savedUser);
+        String token = jwtService.generateToken(savedUser);
 
         Account savedAccount = new Account(
-                1L,
                 "ACC-1001",
                 100.0,
                 savedUser,
@@ -132,7 +140,6 @@ public class TransactionControllerIntegrationTest {
         savedAccount = accountRepository.save(savedAccount);
 
         Account savedAccount2 = new Account(
-                2L,
                 "ACC-1002",
                 50.0,
                 savedUser,
@@ -142,7 +149,9 @@ public class TransactionControllerIntegrationTest {
         );
         savedAccount2 = accountRepository.save(savedAccount2);
 
-        mockMvc.perform(post("/transactions/transfer").contentType(MediaType.APPLICATION_JSON).content("""
+        mockMvc.perform(post("/transactions/transfer")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
                                 {
                                 "fromAccountId": %d,
                                 "toAccountId": %d,
@@ -168,9 +177,9 @@ public class TransactionControllerIntegrationTest {
                 Role.CUSTOMER
         );
         savedUser = userRepository.save(savedUser);
+        String token = jwtService.generateToken(savedUser);
 
         Account savedAccount = new Account(
-                1L,
                 "ACC-1001",
                 100.0,
                 savedUser,
@@ -180,7 +189,9 @@ public class TransactionControllerIntegrationTest {
         );
         savedAccount = accountRepository.save(savedAccount);
 
-        mockMvc.perform(post("/transactions/transfer").contentType(MediaType.APPLICATION_JSON).content("""
+        mockMvc.perform(post("/transactions/transfer")
+                        .header("Authorization", "Bearer " + token)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
                                 {
                                 "fromAccountId": %d,
                                 "toAccountId": %d,
@@ -191,6 +202,6 @@ public class TransactionControllerIntegrationTest {
 
         Account updatedAccount = accountRepository.findById(savedAccount.getId()).orElseThrow();
 
-        assertEquals(100.0, savedAccount.getBalance());
+        assertEquals(100.0, updatedAccount.getBalance());
     }
 }
