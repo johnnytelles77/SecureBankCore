@@ -13,6 +13,7 @@ import com.johnny.securebank.model.enums.AccountType;
 import com.johnny.securebank.model.enums.Role;
 import com.johnny.securebank.repository.AccountRepository;
 import com.johnny.securebank.repository.UserRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,6 +24,9 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -39,6 +43,11 @@ public class AccountServiceTest {
 
     @InjectMocks
     private AccountService accountService;
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
 
 
     @Test
@@ -133,6 +142,14 @@ public class AccountServiceTest {
         );
         savedUser.setId(1L);
 
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        savedUser,
+                        null,
+                        List.of()
+                );
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
         Account account = new Account(
                 1L,
                 "ACC-1001",
@@ -176,6 +193,16 @@ public class AccountServiceTest {
         );
         savedUser.setId(1L);
 
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        savedUser,
+                        null,
+                        List.of()
+                );
+
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
+
         Account account = new Account(
                 1L,
                 "ACC-1002",
@@ -196,14 +223,16 @@ public class AccountServiceTest {
                 AccountStatus.ACTIVE
         );
 
-        when(accountRepository.findAll()).thenReturn(Arrays.asList(account, account2));
+        when(accountRepository.findByUserId(1L))
+                .thenReturn(Arrays.asList(account, account2));
+
         List<AccountResponseDTO> result = accountService.getAccounts();
 
         assertEquals(2, result.size());
-        assertEquals("ACC-1002",  result.get(0).getAccountNumber());
-        assertEquals("ACC-1001",  result.get(1).getAccountNumber());
+        assertEquals("ACC-1002", result.get(0).getAccountNumber());
+        assertEquals("ACC-1001", result.get(1).getAccountNumber());
 
-        verify(accountRepository).findAll();
+        verify(accountRepository).findByUserId(1L);
     }
 
     @Test

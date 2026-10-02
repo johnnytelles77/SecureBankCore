@@ -38,6 +38,9 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/accounts/*/status").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/accounts/*").hasAuthority("ADMIN")
                 .anyRequest().authenticated()
         );
         http.addFilterBefore(

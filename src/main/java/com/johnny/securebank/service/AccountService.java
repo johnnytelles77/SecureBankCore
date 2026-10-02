@@ -5,13 +5,16 @@ import com.johnny.securebank.dto.CreateAccountRequestDTO;
 import com.johnny.securebank.dto.UpdateAccountStatusRequestDTO;
 import com.johnny.securebank.exception.AccountNotFoundException;
 import com.johnny.securebank.exception.DuplicateAccountException;
+import com.johnny.securebank.exception.ForbiddenOperationException;
 import com.johnny.securebank.exception.UserNotFoundException;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.model.User;
 import com.johnny.securebank.model.enums.AccountStatus;
+import com.johnny.securebank.model.enums.Role;
 import com.johnny.securebank.repository.AccountRepository;
 import com.johnny.securebank.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -68,12 +71,36 @@ public class AccountService {
 
     public AccountResponseDTO getAccountById(Long id) {
         Account account = findAccountById(id);
+        validateAccountOwnership(account);
+
         return convertToResponseDTO(account);
     }
 
+    private User getAuthenticatedUser() {
+        return (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+
+    private void validateAccountOwnership(Account account) {
+        User authenticatedUser = getAuthenticatedUser();
+        if (authenticatedUser.getRole() != Role.ADMIN &&
+                !authenticatedUser.getId().equals(account.getUser().getId())) {
+            throw new ForbiddenOperationException("You do not have permission to access this account");
+        }
+    }
+
     public List<AccountResponseDTO> getAccounts() {
-        return accountRepository.findAll()
-                .stream()
+        User authenticatedUser = getAuthenticatedUser();
+
+        List<Account> accounts;
+
+        if (authenticatedUser.getRole() == Role.ADMIN) {
+            accounts = accountRepository.findAll();
+        } else {
+            accounts = accountRepository.findByUserId(authenticatedUser.getId());
+        }
+        return accounts.stream()
                 .map(this::convertToResponseDTO)
                 .toList();
     }

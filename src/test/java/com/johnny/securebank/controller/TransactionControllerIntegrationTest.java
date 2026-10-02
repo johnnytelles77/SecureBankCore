@@ -204,4 +204,53 @@ public class TransactionControllerIntegrationTest {
 
         assertEquals(100.0, updatedAccount.getBalance());
     }
+
+    @Test
+    void withdraw_shouldReturn403WhenCustomerDoesNotOwnAccount() throws Exception {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        savedUser = userRepository.save(savedUser);
+        String token = jwtService.generateToken(savedUser);
+
+
+        User savedUser2 = new User(
+                "Juan",
+                "Perez",
+                "juan@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        savedUser2 = userRepository.save(savedUser2);
+
+        Account savedAccount = new Account(
+                "ACC-1001",
+                100.0,
+                savedUser2,
+                LocalDateTime.now(),
+                AccountType.SAVINGS,
+                AccountStatus.ACTIVE
+        );
+        savedAccount = accountRepository.save(savedAccount);
+
+        mockMvc.perform(post("/transactions/withdraw")
+                .header("Authorization", "Bearer " + token)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(
+                        """
+                                {
+                                "accountId": %d,
+                                "amount": 50.0
+                                }
+                                """.formatted(savedAccount.getId())))
+                .andExpect(status().isForbidden());
+
+        Account updatedAccount = accountRepository.findById(savedAccount.getId()).orElseThrow();
+
+        assertEquals(100.0, updatedAccount.getBalance());
+    }
 }

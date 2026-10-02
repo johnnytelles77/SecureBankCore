@@ -44,7 +44,7 @@ public class UserControllerIntegrationTest {
                 "Telles",
                 "johnny@test.com",
                 "12345678",
-                Role.CUSTOMER
+                Role.ADMIN
         );
         user = userRepository.save(user);
         String token = jwtService.generateToken(user);
