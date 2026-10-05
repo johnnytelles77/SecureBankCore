@@ -11,11 +11,14 @@ import com.johnny.securebank.model.enums.Role;
 import com.johnny.securebank.model.enums.TransactionType;
 import com.johnny.securebank.repository.AccountRepository;
 import com.johnny.securebank.repository.TransactionRepository;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -37,6 +40,23 @@ public class TransactionServiceTest {
     @InjectMocks
     private TransactionService transactionService;
 
+    private void authenticate(User user) {
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
+                        List.of()
+                );
+
+        SecurityContextHolder.getContext()
+                .setAuthentication(authentication);
+    }
+
+    @AfterEach
+    void clearSecurityContext() {
+        SecurityContextHolder.clearContext();
+    }
+
     @Test
     void deposit_shouldDepositSuccessfully() {
         User savedUser = new User(
@@ -46,6 +66,8 @@ public class TransactionServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
+        authenticate(savedUser);
 
         Account savedAccount = new Account(
                 1L,
@@ -109,6 +131,8 @@ public class TransactionServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
+        authenticate(savedUser);
 
         Account savedAccount = new Account(
                 1L,
@@ -172,6 +196,8 @@ public class TransactionServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
+        authenticate(savedUser);
 
         Account savedAccount = new Account(
                 1L,
@@ -207,6 +233,8 @@ public class TransactionServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
+        authenticate(savedUser);
 
         Account savedAccount = new Account(
                 1L,
@@ -286,6 +314,8 @@ public class TransactionServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
+        authenticate(savedUser);
 
         Account savedAccount = new Account(
                 1L,
@@ -319,6 +349,8 @@ public class TransactionServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
+        authenticate(savedUser);
 
         Account savedAccount = new Account(
                 1L,
@@ -366,6 +398,8 @@ public class TransactionServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
+        authenticate(savedUser);
 
         Account savedAccount = new Account(
                 1L,

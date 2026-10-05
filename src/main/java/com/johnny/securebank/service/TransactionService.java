@@ -2,13 +2,18 @@ package com.johnny.securebank.service;
 
 import com.johnny.securebank.dto.TransactionResponseDTO;
 import com.johnny.securebank.exception.AccountNotFoundException;
+import com.johnny.securebank.exception.ForbiddenOperationException;
 import com.johnny.securebank.model.Account;
 import com.johnny.securebank.model.Transaction;
+import com.johnny.securebank.model.User;
+import com.johnny.securebank.model.enums.Role;
 import com.johnny.securebank.model.enums.TransactionType;
 import com.johnny.securebank.repository.AccountRepository;
 import com.johnny.securebank.repository.TransactionRepository;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -51,6 +56,9 @@ public class TransactionService {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()-> new AccountNotFoundException("Account not found"));
+
+        validateAccountOwnership(account);
+
         account.deposit(amount);
         accountRepository.save(account);
 
@@ -72,6 +80,9 @@ public class TransactionService {
 
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(()-> new AccountNotFoundException("Account not found"));
+
+        validateAccountOwnership(account);
+
         account.withdraw(amount);
         accountRepository.save(account);
 
@@ -93,6 +104,9 @@ public class TransactionService {
 
         Account fromAccount = accountRepository.findById(fromAccountId)
                 .orElseThrow(()-> new AccountNotFoundException("From account not found"));
+
+        validateAccountOwnership(fromAccount);
+
         Account toAccount = accountRepository.findById(toAccountId)
                 .orElseThrow(()-> new AccountNotFoundException("To account not found"));
 
@@ -115,12 +129,29 @@ public class TransactionService {
     }
 
     public List<TransactionResponseDTO> getTransactionsByAccountId(Long accountId) {
-        accountRepository.findById(accountId)
+        Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new AccountNotFoundException("Account not found"));
+
+        validateAccountOwnership(account);
 
         return transactionRepository.findByFromAccountIdOrToAccountId(accountId, accountId)
                 .stream()
                 .map(this::convertToResponseDTO)
                 .toList();
+    }
+
+    private User getAuthenticatedUser() {
+        return  (User) SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+    }
+
+    private void validateAccountOwnership(Account account) {
+        User authenticatedUser = getAuthenticatedUser();
+
+        if (authenticatedUser.getRole() != Role.ADMIN
+                && !authenticatedUser.getId().equals(account.getUser().getId())) {
+            throw new ForbiddenOperationException("You do not have permission to access this account");
+        }
     }
 }
