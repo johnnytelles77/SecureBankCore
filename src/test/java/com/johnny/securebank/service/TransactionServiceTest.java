@@ -280,7 +280,6 @@ public class TransactionServiceTest {
         assertEquals(50.0, result.getAmount());
         assertEquals(TransactionType.TRANSFER, result.getType());
         assertEquals(150.0, savedAccount.getBalance());
-        assertEquals(150.0, savedAccount.getBalance());
         assertEquals(150.0, savedAccount2.getBalance());
         assertEquals(1L, result.getFromAccountId());
         assertEquals(2L, result.getToAccountId());
