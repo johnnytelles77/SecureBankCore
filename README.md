@@ -58,6 +58,7 @@ Database
 The application separates responsibilities across controllers, services, repositories, DTOs, entities, security components, and exception handlers.
 
 ## Security
+
 SecureBankCore implements:
 - JWT-based stateless authentication
 - BCrypt password hashing
@@ -67,8 +68,7 @@ SecureBankCore implements:
 - Account ownership validation
 - Environment-based JWT secret configuration.
 
-
-  Sensitive values such as JWT secrets and database credentials are managed through environment variables and are not committed to the repository.
+Sensitive values such as JWT secrets and database credentials are managed through environment variables and are not committed to the repository.
   
 ## API Endpoints
 
@@ -117,34 +117,35 @@ Main tested areas include:
 - Error responses
 
 Run tests with:
-```text
+```bash
 mvn test
 ```
+
 ## Running with Docker
 
 ### Prerequisites
 - Docker
 - Docker Compose
 
-### 1.Clone the repository
-```text
+### 1. Clone the repository
+```bash
 git clone https://github.com/johnnytelles77/SecureBankCore.git
 cd SecureBankCore
 ```
 ### 2. Create the environment file
-```text
+```bash
 cp .env.example .env
 ```
 Edit .env and replace the example values with your own local credentials.
 Example:
-```text
+```env
 JWT_SECRET=replace_with_your_secret
 POSTGRES_DB=securebank
 POSTGRES_USER=securebank_user
 POSTGRES_PASSWORD=replace_with_your_password
 ```
 ### 3. Start the application
-```text
+```bash
 docker compose up --build
 ```
 The API will be available at:
@@ -156,7 +157,7 @@ PostgreSQL runs internally on port 5432 and is exposed locally on:
 localhost:5433
 ```
 ### 4. Stop the application
-```text
+```bash
 docker compose down
 ```
 
@@ -181,6 +182,7 @@ src/main/java/com/johnny/securebank
 ```
 
 ## Roadmap
+
 - GitHub Actions CI/CD
 - Improved application logging and observability
 - Additional security hardening
