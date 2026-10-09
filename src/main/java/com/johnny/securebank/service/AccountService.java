@@ -15,6 +15,8 @@ import com.johnny.securebank.repository.AccountRepository;
 import com.johnny.securebank.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,6 +26,8 @@ public class AccountService {
 
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private static final Logger log =
+            LoggerFactory.getLogger(AccountService.class);
 
     public AccountService(AccountRepository accountRepository,  UserRepository userRepository) {
         this.accountRepository = accountRepository;
@@ -66,6 +70,10 @@ public class AccountService {
         account.setCreatedAt(LocalDateTime.now());
 
         Account savedAccount = accountRepository.save(account);
+        log.info(
+                "Account created: accountId={}, userId={}",
+                savedAccount.getId(),
+                user.getId());
         return convertToResponseDTO(savedAccount);
     }
 
@@ -110,6 +118,10 @@ public class AccountService {
 
         existingAccount.setStatus(request.getStatus());
         Account savedAccount = accountRepository.save(existingAccount);
+        log.info(
+                "Account status updated: accountId={}, status={}",
+                savedAccount.getId(),
+                savedAccount.getStatus());
         return convertToResponseDTO(savedAccount);
     }
 
@@ -119,6 +131,9 @@ public class AccountService {
         existingAccount.setStatus(AccountStatus.CLOSED);
 
         Account savedAccount = accountRepository.save(existingAccount);
+        log.info(
+                "Account closed: accountId={}",
+                savedAccount.getId());
         return convertToResponseDTO(savedAccount);
     }
 }

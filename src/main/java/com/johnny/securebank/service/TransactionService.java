@@ -13,6 +13,8 @@ import com.johnny.securebank.repository.TransactionRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.time.LocalDateTime;
@@ -24,6 +26,9 @@ public class TransactionService {
 
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
+
+    private static final Logger log =
+            LoggerFactory.getLogger(TransactionService.class);
 
     public TransactionService(TransactionRepository transactionRepository, AccountRepository accountRepository) {
         this.transactionRepository = transactionRepository;
@@ -72,6 +77,10 @@ public class TransactionService {
         );
         transaction.setCreatedAt(LocalDateTime.now());
         Transaction savedTransaction = transactionRepository.save(transaction);
+        log.info(
+                "Deposit completed: accountId={}, amount={}",
+                accountId,
+                amount);
         return convertToResponseDTO(savedTransaction);
     }
 
@@ -96,6 +105,10 @@ public class TransactionService {
         );
         transaction.setCreatedAt(LocalDateTime.now());
         Transaction savedTransaction = transactionRepository.save(transaction);
+        log.info(
+                "Withdraw completed: accountId={}, amount={}",
+                accountId,
+                amount);
         return convertToResponseDTO(savedTransaction);
     }
 
@@ -125,6 +138,14 @@ public class TransactionService {
         );
         transaction.setCreatedAt(LocalDateTime.now());
         Transaction savedTransaction = transactionRepository.save(transaction);
+
+        log.info(
+                "Transfer completed: fromAccountId={}, toAccountId={}, amount={}",
+                fromAccountId,
+                toAccountId,
+                amount
+        );
+
         return convertToResponseDTO(savedTransaction);
     }
 
@@ -151,6 +172,12 @@ public class TransactionService {
 
         if (authenticatedUser.getRole() != Role.ADMIN
                 && !authenticatedUser.getId().equals(account.getUser().getId())) {
+            log.warn(
+                    "Unauthorized account access attempt: userId={}, accountId={}",
+                    authenticatedUser.getId(),
+                    account.getId()
+            );
+
             throw new ForbiddenOperationException("You do not have permission to access this account");
         }
     }

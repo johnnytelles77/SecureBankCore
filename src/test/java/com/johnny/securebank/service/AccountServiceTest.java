@@ -64,6 +64,7 @@ public class AccountServiceTest {
                 "12345678",
                 Role.CUSTOMER
         );
+        savedUser.setId(1L);
 
         Account savedAccount = new Account(
                 1L,
