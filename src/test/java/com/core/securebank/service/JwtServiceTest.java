@@ -1,0 +1,144 @@
+package com.core.securebank.service;
+import com.core.securebank.model.User;
+import com.core.securebank.model.enums.Role;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.test.util.ReflectionTestUtils;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
+
+import javax.crypto.SecretKey;
+
+
+import org.junit.jupiter.api.Test;
+
+import java.util.Date;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+public class JwtServiceTest {
+
+    private JwtService jwtService;
+    private static final String TEST_SECRET =
+            "dGVzdC10ZXN0LXRlc3QtdGVzdC10ZXN0LXRlc3QtdGVzdC0xMjM0NTY3ODkwMTIzNA==";
+
+   @BeforeEach
+    void setUp() {
+       jwtService = new JwtService();
+               ReflectionTestUtils.setField(
+                       jwtService,
+                       "secret",
+                       TEST_SECRET
+               );
+
+               ReflectionTestUtils.setField(
+                       jwtService,
+                       "expiration",
+                       3600000L
+               );
+   }
+
+   @Test
+   void generateToken_shouldCreateTokenForUser() {
+       User savedUser = new User(
+               "Johnny",
+               "Telles",
+               "johnny@test.com",
+               "hashed-password",
+               Role.CUSTOMER
+       );
+       String token = jwtService.generateToken(savedUser);
+
+       byte[] keyBytes = Decoders.BASE64.decode(TEST_SECRET);
+       SecretKey key = Keys.hmacShaKeyFor(keyBytes);
+
+       Claims claims = Jwts.parser()
+               .verifyWith(key)
+               .build()
+               .parseSignedClaims(token)
+               .getPayload();
+
+       Date expiration = claims.getExpiration();
+       Date issuedAt = claims.getIssuedAt();
+
+       long tokenDuration = expiration.getTime() - issuedAt.getTime();
+
+       assertNotNull(token);
+       assertFalse(token.isBlank());
+       assertEquals("johnny@test.com", claims.getSubject());
+       assertEquals(
+               "CUSTOMER",
+               claims.get("role", String.class)
+       );
+       assertEquals(3600000L, tokenDuration);
+   }
+
+    @Test
+    void extractEmail_shouldReturnEmailFromValidToken() {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+
+        String email = jwtService.extractEmail(token);
+
+        assertEquals("johnny@test.com", email);
+    }
+
+    @Test
+    void isTokenValid_shouldReturnTrueForValidToken() {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+
+        boolean valid = jwtService.isTokenValid(token, savedUser);
+        assertTrue(valid);
+    }
+
+    @Test
+    void isTokenValid_shouldReturnFalseForDifferentUser() {
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+        User savedUser2 = new User(
+                "Juan",
+                "Perez",
+                "juan@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        boolean valid = jwtService.isTokenValid(token, savedUser2);
+        assertFalse(valid);
+   }
+
+    @Test
+    void isTokenValid_shouldReturnFalseForExpiredToken() {
+        ReflectionTestUtils.setField(jwtService, "expiration", -1000L);
+
+        User savedUser = new User(
+                "Johnny",
+                "Telles",
+                "johnny@test.com",
+                "hashed-password",
+                Role.CUSTOMER
+        );
+        String token = jwtService.generateToken(savedUser);
+        boolean valid = jwtService.isTokenValid(token, savedUser);
+        assertFalse(valid);
+    }
+}
