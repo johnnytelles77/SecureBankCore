@@ -41,6 +41,7 @@ The project simulates core banking operations such as user management, account m
 - Docker
 - Docker Compose
 - Git
+- GitHub Actions
 
 ## Architecture
 
@@ -121,6 +122,40 @@ Run tests with:
 mvn test
 ```
 
+## Continuous Integration (CI)
+
+SecureBankCore uses GitHub Actions to automate build verification and testing.
+
+### CI Pipeline
+
+The pipeline runs on GitHub-hosted Ubuntu runners and performs the following steps:
+
+- Checkout Repository — Retrieves the source code.
+
+- Set Up Java 21 — Configures Eclipse Temurin JDK 21.
+
+- Build and Test — Executes mvn clean verify to compile the application and run automated tests.
+
+### Workflow Configuration
+
+- CI Platform: GitHub Actions
+
+- Operating System: Ubuntu Linux
+
+- Java Version: 21
+
+- Build Tool: Apache Maven
+
+- Workflow File: .github/workflows/ci.yml
+
+The workflow runs automatically on pushes and pull requests targeting the main branch.
+
+## Branch Protection
+
+The main branch requires pull requests and successful CI checks before merging.
+
+This helps prevent changes that fail automated verification from being integrated into the main branch.
+
 ## Running with Docker
 
 ### Prerequisites
@@ -170,7 +205,7 @@ http://localhost:8080/swagger-ui/index.html
 
 ## Project Structure
 ```text
-src/main/java/com/johnny/securebank
+src/main/java/com/core/securebank
 ├── config
 ├── controller
 ├── dto
@@ -182,8 +217,13 @@ src/main/java/com/johnny/securebank
 ```
 
 ## Roadmap
+### Completed
+- GitHub Actions Continuous Integration (CI)
+- Automated Maven build and testing
+- Main branch protection and required CI checks
 
-- GitHub Actions CI/CD
+### Planned
+- Continuous Deployment (CD)
 - Improved application logging and observability
 - Additional security hardening
 - Production deployment
