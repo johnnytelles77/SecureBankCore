@@ -6,6 +6,7 @@ import com.core.securebank.dto.UserResponseDTO;
 import com.core.securebank.exception.DuplicateEmailException;
 import com.core.securebank.exception.UserNotFoundException;
 import com.core.securebank.model.User;
+import com.core.securebank.model.enums.Role;
 import com.core.securebank.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -51,7 +52,7 @@ public class UserService {
                 request.getLastName(),
                 request.getEmail(),
                 encodedPassword,
-                request.getRole()
+                Role.CUSTOMER
         );
 
         user.setCreatedAt(LocalDateTime.now());
@@ -80,7 +81,6 @@ public class UserService {
         existingUser.setFirstName(request.getFirstName());
         existingUser.setLastName(request.getLastName());
         existingUser.setEmail(request.getEmail());
-        existingUser.setRole(request.getRole());
 
         User savedUser = userRepository.save(existingUser);
         return convertToResponseDTO(savedUser);
