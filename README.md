@@ -1,8 +1,16 @@
 # SecureBankCore
 
-SecureBankCore is a backend banking REST API built with Java 21 and Spring Boot.
+**Secure Banking REST API | Java 21 · Spring Boot · PostgreSQL · JWT · Docker**
 
-The project simulates core banking operations such as user management, account management, deposits, withdrawals, transfers, and transaction history. It includes JWT-based authentication, role-based authorization, request validation, global exception handling, automated testing, OpenAPI documentation, and Dockerized local infrastructure with PostgreSQL.
+SecureBankCore is a banking backend application built with Java 21 and Spring Boot. It simulates core banking operations, including customer management, bank account management, deposits, withdrawals, transfers, and transaction history.
+
+The project demonstrates backend engineering practices such as layered architecture, RESTful API design, JWT authentication, role-based authorization, transaction management, database migrations, automated testing, containerization, and continuous integration.
+
+The application is deployed on Render with a PostgreSQL database hosted on Neon.
+
+Live API Documentation: https://securebankcore.onrender.com/swagger-ui/index.html
+
+Source Code: https://github.com/johnnytelles77/SecureBankCore
 
 ## Features
 
@@ -23,40 +31,85 @@ The project simulates core banking operations such as user management, account m
 - Docker and Docker Compose support
 - PostgreSQL persistence
 
+
 ## Tech Stack
 
-- Java 21
-- Spring Boot 3
-- Spring Web
-- Spring Data JPA
-- Spring Security
-- JWT
-- PostgreSQL
-- H2
-- Maven
-- JUnit 5
-- Mockito
-- MockMvc
-- Swagger / OpenAPI
-- Docker
-- Docker Compose
-- Git
-- GitHub Actions
+| Category | Technologies |
+|---|---|
+| Language | Java 21 |
+| Backend Framework | Spring Boot 3, Spring Web |
+| Security | Spring Security, JWT, BCrypt |
+| Persistence | Spring Data JPA, Hibernate |
+| Databases | PostgreSQL, H2 (testing) |
+| Database Migrations | Flyway |
+| API Documentation | Swagger UI, OpenAPI |
+| Testing | JUnit 5, Mockito, MockMvc |
+| Build Tool | Maven |
+| Containerization | Docker, Docker Compose |
+| CI | GitHub Actions |
+| Cloud Hosting | Render, Neon PostgreSQL |
+| Version Control | Git, GitHub |
+
 
 ## Architecture
 
-SecureBankCore follows a layered backend architecture:
+SecureBankCore follows a layered architecture that separates HTTP request handling, business logic, data access, and persistence.
 
-```text
-Controller
-   ↓
-Service
-   ↓
-Repository
-   ↓
-Database
+```mermaid
+flowchart TD
+    A[Client / Swagger UI] --> B[Spring Security + JWT Filter]
+    B --> C[REST Controllers]
+    C --> D[Service Layer]
+    D --> E[Spring Data JPA Repositories]
+    E --> F[(PostgreSQL / Neon)]
+    G[Flyway Migrations] --> F
+    D -.-> H[Global Exception Handler]
+    C -.-> H
 ```
-The application separates responsibilities across controllers, services, repositories, DTOs, entities, security components, and exception handlers.
+
+### Layer Responsibilities
+
+- **Controllers:** Expose REST endpoints and handle HTTP requests and responses.
+- **Services:** Implement business rules for users, accounts, and transactions.
+- **Repositories:** Provide database access through Spring Data JPA.
+- **Security:** Authenticate JWT tokens and enforce authorization rules.
+- **Database:** Persist banking data in PostgreSQL.
+- **Flyway:** Manage versioned database schema migrations.
+- **Exception Handling:** Convert application exceptions into consistent HTTP error responses.
+
+
+## Deployment
+
+SecureBankCore is deployed using a cloud-based infrastructure.
+
+| Component | Technology |
+|---|---|
+| Backend hosting | Render |
+| Database hosting | Neon PostgreSQL |
+| Containerization | Docker |
+| Database migrations | Flyway |
+| Continuous Integration | GitHub Actions |
+| API documentation | Swagger UI / OpenAPI |
+
+### Production Architecture
+
+```mermaid
+flowchart TD
+    A[GitHub Repository] --> B[GitHub Actions CI]
+    A --> C[Render Deployment]
+    C --> D[Spring Boot API / Docker]
+    D --> E[(Neon PostgreSQL)]
+    F[Flyway Migrations] --> E
+```
+
+### Live Documentation
+
+[Swagger UI](https://securebankcore.onrender.com/swagger-ui/index.html)
+
+The application uses environment variables to configure database credentials, JWT secrets, and the active Spring profile. The production environment enables Flyway migrations and Hibernate schema validation.
+
+**Note:** Render's free instance may require additional time to respond after a period of inactivity.
+
 
 ## Security
 
@@ -101,60 +154,66 @@ POST /transactions/transfer
 GET  /transactions/account/{id}
 ```
 
+
 ## Testing
 
-The project includes both unit and integration tests.
-Unit tests cover service-layer business logic using JUnit and Mockito.
-Integration tests validate API behavior using Spring Boot Test and MockMvc.
-Main tested areas include:
-- Authentication
-- User operations
-- Account operations
-- Deposits
-- Withdrawals
-- Transfers
-- Transaction history
-- Authorization
-- Error responses
+SecureBankCore includes automated unit and integration tests to verify business logic, REST API behavior, and security rules.
 
-Run tests with:
+### Testing Technologies
+
+- **JUnit 5:** Test framework for Java.
+- **Mockito:** Mocking dependencies to isolate business logic.
+- **MockMvc:** Testing HTTP requests and responses without starting a real web server.
+- **Spring Boot Test:** Integration testing with the Spring application context.
+- **H2:** In-memory database used in testing.
+
+### Test Coverage Areas
+
+- Authentication and JWT security
+- User and account management
+- Deposits, withdrawals, and transfers
+- Transaction history
+- Role-based authorization
+- Request validation and exception handling
+
+### Running Tests
+
 ```bash
-mvn test
+mvn clean verify
 ```
+
+The project currently contains **80 automated tests**, all passing in the latest verified build.
+
+GitHub Actions executes the Maven verification process automatically as part of the CI pipeline.
+
+
 
 ## Continuous Integration (CI)
 
-SecureBankCore uses GitHub Actions to automate build verification and testing.
+SecureBankCore uses GitHub Actions to automatically build and test the application before changes are merged into the main branch.
 
-### CI Pipeline
+### CI Workflow
 
-The pipeline runs on GitHub-hosted Ubuntu runners and performs the following steps:
+1. Checkout the repository.
+2. Set up Java 21.
+3. Execute Maven build and verification.
+4. Report the result as a GitHub status check.
 
-- Checkout Repository — Retrieves the source code.
+```bash
+mvn clean verify
+```
 
-- Set Up Java 21 — Configures Eclipse Temurin JDK 21.
+The workflow is defined in `.github/workflows/ci.yml` and runs on pushes to `main` and Pull Requests targeting `main`.
 
-- Build and Test — Executes mvn clean verify to compile the application and run automated tests.
+### Branch Protection
 
-### Workflow Configuration
+The `main` branch is protected and requires:
 
-- CI Platform: GitHub Actions
+- Changes to be submitted through Pull Requests.
+- The required `build` status check to pass before merging.
+- The Pull Request branch to be up to date with the target branch.
 
-- Operating System: Ubuntu Linux
-
-- Java Version: 21
-
-- Build Tool: Apache Maven
-
-- Workflow File: .github/workflows/ci.yml
-
-The workflow runs automatically on pushes and pull requests targeting the main branch.
-
-## Branch Protection
-
-The main branch requires pull requests and successful CI checks before merging.
-
-This helps prevent changes that fail automated verification from being integrated into the main branch.
+This process helps prevent unverified changes from entering the main branch.
 
 ## Running with Docker
 
@@ -217,14 +276,30 @@ src/main/java/com/core/securebank
 ```
 
 ## Roadmap
-### Completed
-- GitHub Actions Continuous Integration (CI)
-- Automated Maven build and testing
-- Main branch protection and required CI checks
 
-### Planned
-- Continuous Deployment (CD)
-- Improved application logging and observability
-- Additional security hardening
-- Production deployment
-- Expanded integration test coverage
+### Completed
+
+- [x] Banking REST API with user, account, and transaction management
+- [x] JWT authentication, role-based authorization, and exception handling
+- [x] Unit and integration testing (80 passing tests)
+- [x] PostgreSQL persistence and Flyway database migrations
+- [x] Docker containerization and GitHub Actions CI
+- [x] Production deployment on Render with Neon PostgreSQL
+
+### Future Development
+
+#### Quality & Security
+- [ ] Expand test coverage with JaCoCo and implement automated CD
+- [ ] Enhance API security, auditing, and observability
+
+#### Linux & DevOps
+- [ ] Deploy and secure an Ubuntu Linux server using Docker
+- [ ] Implement infrastructure monitoring and explore Kubernetes
+
+#### Artificial Intelligence
+- [ ] Build a Python microservice for transaction risk analysis
+- [ ] Develop anomaly detection models with scikit-learn and PyTorch
+
+#### Distributed Systems
+- [ ] Explore Spring Cloud microservices and Java–Python integration
+- [ ] Implement event-driven communication with Apache Kafka
