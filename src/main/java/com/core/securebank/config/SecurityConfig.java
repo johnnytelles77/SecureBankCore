@@ -25,6 +25,7 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.sessionManagement(session ->
@@ -38,14 +39,22 @@ public class SecurityConfig {
         http.authorizeHttpRequests(auth -> auth
                 .requestMatchers(HttpMethod.POST, "/auth/login").permitAll()
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
-                .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.PATCH, "/accounts/*/status").hasAuthority("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/accounts/*").hasAuthority("ADMIN")
+
                 .requestMatchers(
                         "/swagger-ui/**",
                         "/swagger-ui.html",
                         "/v3/api-docs/**"
                 ).permitAll()
+
+                .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.GET, "/users/*").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/users/*").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/users/*").hasAuthority("ADMIN")
+
+                .requestMatchers(HttpMethod.POST, "/accounts").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.PATCH, "/accounts/*/status").hasAuthority("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/accounts/*").hasAuthority("ADMIN")
+
                 .anyRequest().authenticated()
         );
         http.addFilterBefore(

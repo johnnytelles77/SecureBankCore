@@ -61,7 +61,7 @@ public class UserControllerIntegrationTest {
                 "Telles",
                 "johnny@test.com",
                 "12345678",
-                Role.CUSTOMER
+                Role.ADMIN
         );
         savedUser = userRepository.save(savedUser);
         String token = jwtService.generateToken(savedUser);
@@ -82,7 +82,7 @@ public class UserControllerIntegrationTest {
                 "Telles",
                 "johnny@test.com",
                 "12345678",
-                Role.CUSTOMER
+                Role.ADMIN
         );
         savedUser = userRepository.save(savedUser);
         String token = jwtService.generateToken(savedUser);
@@ -115,5 +115,23 @@ public class UserControllerIntegrationTest {
                 passwordEncoder.matches("12345678",
                         savedUser.getPassword())
         );
+    }
+
+    @Test
+    void getUserById_shouldReturn403ForCustomer() throws Exception {
+        User customer = new User(
+                "Test",
+                "Customer",
+                "customer@test.com",
+                "12345678",
+                Role.CUSTOMER
+        );
+
+        customer = userRepository.save(customer);
+        String token = jwtService.generateToken(customer);
+
+        mockMvc.perform(get("/users/" + customer.getId())
+                        .header("Authorization", "Bearer " + token))
+                .andExpect(status().isForbidden());
     }
 }

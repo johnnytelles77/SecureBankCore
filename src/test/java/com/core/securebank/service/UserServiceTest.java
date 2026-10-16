@@ -235,4 +235,34 @@ public class UserServiceTest {
 
         verify(userRepository, never()).delete(any(User.class));
     }
+
+    @Test
+    void registerUser_shouldNeverAssignAdminRole() {
+        CreateUserRequestDTO request = new CreateUserRequestDTO(
+                "Test",
+                "Security",
+                "security@test.com",
+                "password123",
+                Role.ADMIN
+        );
+
+        when(userRepository.existsByEmail(request.getEmail()))
+                .thenReturn(false);
+
+        when(passwordEncoder.encode("password123"))
+                .thenReturn("hashed-password");
+
+        ArgumentCaptor<User> captor =
+                ArgumentCaptor.forClass(User.class);
+
+        when(userRepository.save(any(User.class)))
+                .thenAnswer(invocation -> invocation.getArgument(0));
+
+        UserResponseDTO result = userService.registerUser(request);
+
+        verify(userRepository).save(captor.capture());
+
+        assertEquals(Role.CUSTOMER, captor.getValue().getRole());
+        assertEquals(Role.CUSTOMER, result.getRole());
+    }
 }
