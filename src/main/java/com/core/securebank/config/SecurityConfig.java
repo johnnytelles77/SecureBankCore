@@ -41,6 +41,11 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/users").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.PATCH, "/accounts/*/status").hasAuthority("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/accounts/*").hasAuthority("ADMIN")
+                .requestMatchers(
+                        "/swagger-ui/**",
+                        "/swagger-ui.html",
+                        "/v3/api-docs/**"
+                ).permitAll()
                 .anyRequest().authenticated()
         );
         http.addFilterBefore(
