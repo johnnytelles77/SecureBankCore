@@ -22,7 +22,6 @@ public class CreateUserRequestDTO {
     @Size(min = 8, max = 100)
     private String password;
 
-    @NotNull
     private Role role;
 
     public CreateUserRequestDTO() {}
